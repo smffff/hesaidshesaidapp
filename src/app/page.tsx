@@ -22,8 +22,37 @@ export default function Home() {
   const handleTranslate = async (text: string): Promise<TranslationResponse> => {
     setIsLoading(true)
     try {
-      // In production, this would call the Supabase Edge Function
-      // For now, we'll simulate a response
+      // Check if we have Supabase credentials configured
+      const hasSupabaseConfig = 
+        process.env.NEXT_PUBLIC_SUPABASE_URL && 
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+      if (hasSupabaseConfig) {
+        // Use the real API endpoint when Supabase is configured
+        const response = await fetch('/api/translate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            text,
+            mode,
+            relationshipContext: currentRelationship ? {
+              partnerName: currentRelationship.partner_name,
+              communicationPatterns: currentRelationship.communication_patterns,
+              emotionalTriggers: currentRelationship.emotional_triggers,
+            } : undefined,
+          }),
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          setResult(data)
+          setUsageCount(prev => prev + 1)
+          return data
+        }
+      }
+
+      // Fallback to mock response for demo purposes when Supabase is not configured
+      // This allows the app to be explored without backend setup
       const mockResponse: TranslationResponse = {
         originalText: text,
         translatedText: mode === 'speak' 

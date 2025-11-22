@@ -87,7 +87,9 @@ serve(async (req) => {
     // Call OpenAI API for translation
     const openaiApiKey = Deno.env.get('OPENAI_API_KEY')
     if (!openaiApiKey) {
-      throw new Error('OpenAI API key not configured')
+      throw new Error(
+        'OPENAI_API_KEY environment variable is missing. Please configure it in Supabase secrets using: supabase secrets set OPENAI_API_KEY=your_key'
+      )
     }
 
     const systemPrompt = mode === 'speak'

@@ -8,6 +8,8 @@ interface TranslationResultProps {
   mode: 'speak' | 'understand'
 }
 
+// Note: All user-provided text content is safely rendered by React
+// React automatically escapes text in JSX expressions, preventing XSS attacks
 export function TranslationResult({ result, mode }: TranslationResultProps) {
   const getSafetyColor = (level: number) => {
     if (level >= 8) return 'text-green-600'

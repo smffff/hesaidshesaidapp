@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { TranslationMode, TranslationResponse } from '@/types'
 import { useAppStore } from '@/store/appStore'
+import { createClient } from '@/lib/supabase/client'
 
 export function useTranslation() {
   const [isLoading, setIsLoading] = useState(false)
@@ -15,6 +16,15 @@ export function useTranslation() {
     setError(null)
 
     try {
+      const supabase = createClient()
+      
+      // Get the current user
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (!user) {
+        throw new Error('You must be logged in to use translations')
+      }
+
       // Build relationship context if available
       const relationshipContext = currentRelationship
         ? {
@@ -43,10 +53,10 @@ export function useTranslation() {
 
       const data: TranslationResponse = await response.json()
 
-      // Add to store (in production, this would come from the API response)
+      // Add to store with actual user ID
       addTranslation({
         id: crypto.randomUUID(),
-        user_id: 'current-user', // Would come from auth
+        user_id: user.id,
         relationship_id: currentRelationship?.id,
         mode,
         original_text: text,
